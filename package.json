@@ -1,0 +1,23 @@
+{
+  "name": "ddda-save-editor",
+  "version": "0.1.0",
+  "description": "Savegame editor for Dragon's Dogma: Dark Arisen",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --progress --colors",
+    "start": "webpack-dev-server --progress -colors --content-base dist --open http://localhost:8080/"
+  },
+  "author": "atvaark",
+  "license": "MIT",
+  "dependencies": {
+    "crc-32": "^0.4.0",
+    "filesaver.js": "^0.2.0",
+    "pako": "^0.2.8",
+    "webpack": "^1.12.12"
+  },
+  "devDependencies": {
+    "css-loader": "^0.23.1",
+    "style-loader": "^0.13.0",
+    "webpack-dev-server": "^1.14.1"
+  }
+}
