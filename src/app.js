@@ -33,11 +33,16 @@ function parseText(text){
     var saveDocument = parser.parseFromString(text, "application/xml");
     var saveDom = new DDDASaveDom();
     var root = saveDom.parse(saveDocument);
-    var roots = JSON.stringify(root, null, 4);
 
-    var elem = document.createElement('div');
-    elem.innerHTML = roots;
-    document.body.appendChild(elem);
+    var dom2 = document.implementation.createDocument('', 'test', null);
+    root.serializeNode(dom2, dom2.documentElement);
+    var xmlString = dom2.documentElement.innerHTML;
+    document.body.appendChild(document.createTextNode(xmlString));
+    
+    //var text = JSON.stringify(root, null, 4);
+    //var elem = document.createElement('div');
+    //elem.innerHTML = text;
+    //document.body.appendChild(elem);
 };
 
 /**

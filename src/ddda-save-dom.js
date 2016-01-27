@@ -1,20 +1,20 @@
 var DDDAFactory = function() {
-    this[DDDAbool.elemName] = DDDAbool;
-    this[DDDAf32.elemName] = DDDAf32;
-    this[DDDAs8.elemName] = DDDAs8;
-    this[DDDAs16.elemName] = DDDAs16;
-    this[DDDAs32.elemName] = DDDAs32;
-    this[DDDAs64.elemName] = DDDAs64;
-    this[DDDAu8.elemName] = DDDAu8;
-    this[DDDAu16.elemName] = DDDAu16;
-    this[DDDAu32.elemName] = DDDAu32;
-    this[DDDAu64.elemName] = DDDAu64;
-    this[DDDAstring.elemName] = DDDAstring;
-    this[DDDAvector3.elemName] = DDDAvector3;
-    this[DDDAtime.elemName] = DDDAtime;
-    this[DDDAclass.elemName] = DDDAclass;
-    this[DDDAclassref.elemName] = DDDAclassref;
-    this[DDDAarray.elemName] = DDDAarray;
+    this[DDDAbool.prototype.elemName] = DDDAbool;
+    this[DDDAf32.prototype.elemName] = DDDAf32;
+    this[DDDAs8.prototype.elemName] = DDDAs8;
+    this[DDDAs16.prototype.elemName] = DDDAs16;
+    this[DDDAs32.prototype.elemName] = DDDAs32;
+    this[DDDAs64.prototype.elemName] = DDDAs64;
+    this[DDDAu8.prototype.elemName] = DDDAu8;
+    this[DDDAu16.prototype.elemName] = DDDAu16;
+    this[DDDAu32.prototype.elemName] = DDDAu32;
+    this[DDDAu64.prototype.elemName] = DDDAu64;
+    this[DDDAstring.prototype.elemName] = DDDAstring;
+    this[DDDAvector3.prototype.elemName] = DDDAvector3;
+    this[DDDAtime.prototype.elemName] = DDDAtime;
+    this[DDDAclass.prototype.elemName] = DDDAclass;
+    this[DDDAclassref.prototype.elemName] = DDDAclassref;
+    this[DDDAarray.prototype.elemName] = DDDAarray;
 };
 var DDDAValue = function(){
     this.value = null;
@@ -23,8 +23,10 @@ DDDAValue.prototype.parseNode = function (node) {
     this.value = node.getAttribute('value');
     return this;
 };
-DDDAValue.prototype.serializeNode = function (rootNode) {
-
+DDDAValue.prototype.serializeNode = function (doc, parentNode) {
+    var node = doc.createElement(this.elemName);
+    node.setAttribute('value', this.value);
+    parentNode.appendChild(node);
 };
 var DDDAbool = function(){
     DDDAValue.call(this)
@@ -70,8 +72,12 @@ DDDAvector3.prototype.parseNode = function (node) {
     this.z = node.getAttribute('z');
     return this;
 };
-DDDAvector3.prototype.serializeNode = function (rootNode) {
-
+DDDAvector3.prototype.serializeNode = function (doc, parentNode) {    
+    var node = doc.createElement(this.elemName);
+    node.setAttribute('x', this.x);
+    node.setAttribute('y', this.y);
+    node.setAttribute('z', this.z);
+    parentNode.appendChild(node);
 };
 var DDDAtime = function(){
     this.second = null;
@@ -90,8 +96,15 @@ DDDAtime.prototype.parseNode = function (node) {
     this.year = node.getAttribute('year');
     return this;
 };
-DDDAtime.prototype.serializeNode = function (rootNode) {
-
+DDDAtime.prototype.serializeNode = function (doc, parentNode) {
+    var node = doc.createElement(this.elemName);
+    node.setAttribute('second', this.second);
+    node.setAttribute('minute', this.minute);
+    node.setAttribute('hour', this.hour);
+    node.setAttribute('day', this.day);
+    node.setAttribute('month', this.month);
+    node.setAttribute('year', this.year);
+    parentNode.appendChild(node);
 };
 var DDDAclass = function(){
     this.type = null;
@@ -112,8 +125,20 @@ DDDAclass.prototype.parseNode = function (node) {
     }
     return this;
 };
-DDDAclass.prototype.serializeNode = function (rootNode) {
+DDDAclass.prototype.serializeNode = function (doc, parentNode) {
+    var node = doc.createElement(this.elemName);
+    node.setAttribute('type', this.type);
+    for (var property in this) {
+        if (this.hasOwnProperty(property)) {
+            var value = this[property];
+            if (!value || typeof(value.serializeNode) !== 'function') {
+                continue;
+            }
 
+            value.serializeNode(doc, node);
+        }
+    }
+    parentNode.appendChild(node);
 };
 var DDDAclassref = function(){
     DDDAclass.call(this)
@@ -140,27 +165,15 @@ DDDAarray.prototype.parseNode = function (node) {
     }    
     return this;
 };
-DDDAarray.prototype.serializeNode = function (rootNode) {
-
+DDDAarray.prototype.serializeNode = function (doc, parentNode) {
+    var node = doc.createElement(this.elemName);
+    node.setAttribute('count', this.count);
+    node.setAttribute('type', this.type);
+    for (var i = 0; i < this.items.length; i++) {
+        this.items[i].serializeNode(doc, node);
+    };
+    parentNode.appendChild(node);
 };
-
-DDDAValue.elemName = null;
-DDDAbool.elemName = 'bool';
-DDDAf32.elemName = 'f32';
-DDDAs8.elemName = 's8';
-DDDAs16.elemName = 's16';
-DDDAs32.elemName = 's32';
-DDDAs64.elemName = 's64';
-DDDAu8.elemName = 'u8';
-DDDAu16.elemName = 'u16';
-DDDAu32.elemName = 'u32';
-DDDAu64.elemName = 'u64';
-DDDAstring.elemName = 'string';
-DDDAvector3.elemName = 'vector3';
-DDDAtime.elemName = 'time';
-DDDAclass.elemName = 'class';
-DDDAclassref.elemName = 'classref';
-DDDAarray.elemName = 'array';
 
 DDDAbool.prototype = Object.create(DDDAValue.prototype);
 DDDAf32.prototype = Object.create(DDDAValue.prototype);
@@ -174,6 +187,24 @@ DDDAu32.prototype = Object.create(DDDAValue.prototype);
 DDDAu64.prototype = Object.create(DDDAValue.prototype);
 DDDAstring.prototype = Object.create(DDDAValue.prototype);
 DDDAclassref.prototype = Object.create(DDDAclass.prototype);
+
+DDDAValue.prototype.elemName = null;
+DDDAbool.prototype.elemName = 'bool';
+DDDAf32.prototype.elemName = 'f32';
+DDDAs8.prototype.elemName = 's8';
+DDDAs16.prototype.elemName = 's16';
+DDDAs32.prototype.elemName = 's32';
+DDDAs64.prototype.elemName = 's64';
+DDDAu8.prototype.elemName = 'u8';
+DDDAu16.prototype.elemName = 'u16';
+DDDAu32.prototype.elemName = 'u32';
+DDDAu64.prototype.elemName = 'u64';
+DDDAstring.prototype.elemName = 'string';
+DDDAvector3.prototype.elemName = 'vector3';
+DDDAtime.prototype.elemName = 'time';
+DDDAclass.prototype.elemName = 'class';
+DDDAclassref.prototype.elemName = 'classref';
+DDDAarray.prototype.elemName = 'array';
 
 DDDAclass.factory = new DDDAFactory();
 DDDAarray.factory = new DDDAFactory();
