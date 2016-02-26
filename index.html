@@ -6,5 +6,24 @@
     <script src="bundle.js"></script>
   </head>
   <body>
+  <h1>ddda-save-editor</h1>
+  <div id="savegame-dropzone">
+    <label for="load-input">Load DDDA.sav</label>
+    <input id="load-input" type="file"/>    
+    <h3>Hints</h3>
+    <ol>
+      <li>Savegames can be found here: <i>%ProgramFiles(x86)%\Steam\userdata\%userid%\367500\remote\DDDA.sav</i></li>
+      <li>Your savegame will <b>not</b> be uploaded to a server.</li>
+      <li>Create a backup before using edited savegames.</li>
+    </ol>
+  </div>
+  <!-- Test savegame info -->
+  <div id="savegame-content" style="display:none">
+    <div>
+      <label for="steamid">SteamId</label>
+      <input id="steamid" type="text" name="steamid"/>
+    </div>
+    <button id="save-button">Save DDDA.sav</button>
+  </div>
   </body>
 </html>
