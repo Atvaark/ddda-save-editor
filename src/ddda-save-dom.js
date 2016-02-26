@@ -20,11 +20,14 @@ var DDDAValue = function(){
     this.value = null;
 };
 DDDAValue.prototype.parseNode = function (node) {
+    var name = node.getAttribute('name');
+    if (name) this.name = name;
     this.value = node.getAttribute('value');
     return this;
 };
 DDDAValue.prototype.serializeNode = function (doc, parentNode) {
     var node = doc.createElement(this.elemName);
+    if (this.name) node.setAttribute('name', this.name);    
     node.setAttribute('value', this.value);
     parentNode.appendChild(node);
 };
@@ -67,6 +70,8 @@ var DDDAvector3 = function(){
     this.z = null;
 };
 DDDAvector3.prototype.parseNode = function (node) {
+    var name = node.getAttribute('name');
+    if (name) this.name = name;
     this.x = node.getAttribute('x');
     this.y = node.getAttribute('y');
     this.z = node.getAttribute('z');
@@ -74,6 +79,7 @@ DDDAvector3.prototype.parseNode = function (node) {
 };
 DDDAvector3.prototype.serializeNode = function (doc, parentNode) {    
     var node = doc.createElement(this.elemName);
+    if (this.name) node.setAttribute('name', this.name);   
     node.setAttribute('x', this.x);
     node.setAttribute('y', this.y);
     node.setAttribute('z', this.z);
@@ -88,6 +94,8 @@ var DDDAtime = function(){
     this.year = null;
 };
 DDDAtime.prototype.parseNode = function (node) {
+    var name = node.getAttribute('name');
+    if (name) this.name = name;
     this.second = node.getAttribute('second');
     this.minute = node.getAttribute('minute');
     this.hour = node.getAttribute('hour');
@@ -98,6 +106,7 @@ DDDAtime.prototype.parseNode = function (node) {
 };
 DDDAtime.prototype.serializeNode = function (doc, parentNode) {
     var node = doc.createElement(this.elemName);
+    if (this.name) node.setAttribute('name', this.name);   
     node.setAttribute('second', this.second);
     node.setAttribute('minute', this.minute);
     node.setAttribute('hour', this.hour);
@@ -110,15 +119,16 @@ var DDDAclass = function(){
     this.type = null;
 };
 DDDAclass.prototype.parseNode = function (node) {
+    var name = node.getAttribute('name');
+    if (name) this.name = name;
     this.type = node.getAttribute('type');
     node = node.firstChild;
     while (node) {
         if (node.nodeType == 1) {
-            var memberName = node.getAttribute('name');
             var memberType = DDDAclass.factory[node.tagName];
             var member = new memberType();
             member.parseNode(node);
-            this[memberName] = member;
+            this[member.name] = member;
         }
 
         node = node.nextSibling;
@@ -127,6 +137,7 @@ DDDAclass.prototype.parseNode = function (node) {
 };
 DDDAclass.prototype.serializeNode = function (doc, parentNode) {
     var node = doc.createElement(this.elemName);
+    if (this.name) node.setAttribute('name', this.name);   
     node.setAttribute('type', this.type);
     for (var property in this) {
         if (this.hasOwnProperty(property)) {
@@ -150,6 +161,8 @@ var DDDAarray = function(){
 };
 DDDAarray.prototype.parseNode = function (node) {
     this.count = node.getAttribute('count');
+    var name = node.getAttribute('name');
+    if (name) this.name = name;
     this.type = node.getAttribute('type');
     this.items = [];
     node = node.firstChild;
@@ -168,6 +181,7 @@ DDDAarray.prototype.parseNode = function (node) {
 DDDAarray.prototype.serializeNode = function (doc, parentNode) {
     var node = doc.createElement(this.elemName);
     node.setAttribute('count', this.count);
+    if (this.name) node.setAttribute('name', this.name);   
     node.setAttribute('type', this.type);
     for (var i = 0; i < this.items.length; i++) {
         this.items[i].serializeNode(doc, node);

@@ -4,14 +4,27 @@ var DDDASave = require('./ddda-save')
 var DDDASaveDom = require('./ddda-save-dom')
 
 /**
- * Parses the savegame and returns the content of it.
+ * Parses the savegame and returns the content as a string.
  * @param {ArrayBuffer} buffer 
  * @return {String}
  */
-function parse(buffer){
+function parseSavegame(buffer){
     var save = new DDDASave();
     save.parse(buffer); 
     return save.data;
+};
+
+/**
+ * Parses the xml savegame and returns the content as an object.
+ * @param {String} text 
+ * @return {Object}
+ */
+function parseSavegameData(text){
+    var parser = new DOMParser();
+    var saveDocument = parser.parseFromString(text, "application/xml");
+    var saveDom = new DDDASaveDom();
+    var savedata = saveDom.parse(saveDocument);
+    return savedata;
 };
 
 /**
@@ -19,36 +32,73 @@ function parse(buffer){
  * @param {String} text 
  * @return {ArrayBuffer}
  */
-function serialize(text){
+function serializeSavegame(text){
     var save = new DDDASave(text);
     var data = save.serialize();
     return data;
 };
 
 /**
- * Displays the savegame as JSON.
+ * Serializes the savedata object as an xml string.
+ * @param {Object} savedata 
+ * @return {String}
  */
-function parseText(text){
-    var parser = new DOMParser();
-    var saveDocument = parser.parseFromString(text, "application/xml");
-    var saveDom = new DDDASaveDom();
-    var root = saveDom.parse(saveDocument);
+function serializeSavegameData(savedata) {
+    var dom = document.implementation.createDocument('', 'root', null);
+    savedata.serializeNode(dom, dom.documentElement);
+    return dom.documentElement.innerHTML;
+};
 
-    var dom2 = document.implementation.createDocument('', 'test', null);
-    root.serializeNode(dom2, dom2.documentElement);
-    var xmlString = dom2.documentElement.innerHTML;
-    document.body.appendChild(document.createTextNode(xmlString));
-    
-    //var text = JSON.stringify(root, null, 4);
-    //var elem = document.createElement('div');
-    //elem.innerHTML = text;
-    //document.body.appendChild(elem);
+/**
+ * 
+ * @param {Object} savedata
+ */
+function displaySavegameData(savedata){
+    document.getElementById('savegame-dropzone').style.display = 'none';
+    document.getElementById('save-button').onclick = function() {
+        var text = serializeSavegameData(savedata);
+        var data = serializeSavegame(text);
+        var blob = new Blob([data], {type: "application/octet-stream"});
+        filesaver.saveAs(blob, "DDDA.sav");
+    };    
+
+    var steamId = document.getElementById('steamid');
+    steamId.value = savedata.mSteamID.value;
+    steamId.onchange = function (e) {
+        savedata.mSteamID.value = e.target.value;
+    };
+
+    document.getElementById('savegame-content').style.display = '';
+};
+
+/**
+ * 
+ * @param {ArrayBuffer} buffer 
+ */
+function display(buffer) {
+    var text = parseSavegame(buffer);
+    var savedata = parseSavegameData(text);
+    displaySavegameData(savedata);
+};
+
+
+/**
+ * 
+ * @param {File} file 
+ */
+function loadSavegame(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        display(e.target.result);
+    };
+
+    reader.readAsArrayBuffer(file);
 };
 
 /**
  * Downloads, reads and exports the demo savegame.
  */
-function test(){
+function test() {
     console.log('requesting demo savegame');
     var request = new XMLHttpRequest();
     request.open("GET", "DDDA.sav", true);
@@ -56,13 +106,7 @@ function test(){
     request.onload = function() {
         if (request.status === 200) {
             console.log('demo savegame found');
-
-            var text = parse(request.response);
-            parseText(text);
-            return;
-            // var data = serialize(text);
-            // var blob = new Blob([data], {type: "application/octet-stream"});
-            // filesaver.saveAs(blob, "DDDA.sav");
+            display(request.response);
         } else {
             console.log('demo savegame not found');
         }
@@ -71,6 +115,16 @@ function test(){
     request.send();
 };
 
+function init() {
+    document.getElementById('load-input').onchange = function (e) {
+        var file = e.target.files[0];
+        if (file) {
+            loadSavegame(file);            
+        }
+    };
+};
+
 window.onload = function() {
-    test();
+    //test();
+    init();
 };
