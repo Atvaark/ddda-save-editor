@@ -5,7 +5,7 @@ var DDDASaveDom = require('./ddda-save-dom')
 
 /**
  * Parses the savegame and returns the content as a string.
- * @param {ArrayBuffer} buffer 
+ * @param {ArrayBuffer} buffer
  * @return {String}
  */
 function parseSavegame(buffer){
@@ -16,51 +16,45 @@ function parseSavegame(buffer){
 
 /**
  * Parses the xml savegame and returns the content as an object.
- * @param {String} text 
+ * @param {String} text
  * @return {Object}
  */
 function parseSavegameData(text){
     var parser = new DOMParser();
     var saveDocument = parser.parseFromString(text, "application/xml");
+
     var saveDom = new DDDASaveDom();
     var savedata = saveDom.parse(saveDocument);
+
     return savedata;
 };
 
 /**
- * Serializes the savegame content and returns it in a buffer.
- * @param {String} text 
- * @return {ArrayBuffer}
+ * Serializes the savedata and downloads it.
+ * @param {Object} savedata
  */
-function serializeSavegame(text){
+function exportSavedata(savedata) { 
+    var saveDom = new DDDASaveDom();
+    var text = saveDom.serialize(savedata);
+
     var save = new DDDASave(text);
     var data = save.serialize();
-    return data;
-};
 
-/**
- * Serializes the savedata object as an xml string.
- * @param {Object} savedata 
- * @return {String}
- */
-function serializeSavegameData(savedata) {
-    var dom = document.implementation.createDocument('', 'root', null);
-    savedata.serializeNode(dom, dom.documentElement);
-    return dom.documentElement.innerHTML;
+    var blob = new Blob([data], {type: "application/octet-stream"});
+    filesaver.saveAs(blob, "DDDA.sav");
 };
 
 /**
  * 
  * @param {Object} savedata
  */
-function displaySavegameData(savedata){
+function displaySavegameData(savedata) {
     document.getElementById('savegame-dropzone').style.display = 'none';
-    document.getElementById('save-button').onclick = function() {
-        var text = serializeSavegameData(savedata);
-        var data = serializeSavegame(text);
-        var blob = new Blob([data], {type: "application/octet-stream"});
-        filesaver.saveAs(blob, "DDDA.sav");
-    };    
+    document.getElementById('save-button').onclick = (function() {
+        return function(){
+            exportSavedata(savedata);
+        };
+    })();
 
     var steamId = document.getElementById('steamid');
     steamId.value = savedata.mSteamID.value;
@@ -73,30 +67,60 @@ function displaySavegameData(savedata){
 
 /**
  * 
- * @param {ArrayBuffer} buffer 
+ * @param {ArrayBuffer} buffer
  */
-function display(buffer) {
+function importSavegame(buffer) {
     var text = parseSavegame(buffer);
     var savedata = parseSavegameData(text);
+    
     displaySavegameData(savedata);
 };
 
-
 /**
  * 
- * @param {File} file 
+ * @param {File} file
  */
-function loadSavegame(file) {
+function readSavegame(file) {
     var reader = new FileReader();
     reader.onload = function(e) {
-        display(e.target.result);
+        importSavegame(e.target.result);
     };
 
     reader.readAsArrayBuffer(file);
 };
 
 /**
- * Downloads, reads and exports the demo savegame.
+ * 
+ */
+function reset() {
+    document.getElementById('savegame-content').style.display = 'none';
+    document.getElementById('save-button').onclick = '';
+
+    var steamId = document.getElementById('steamid');
+    steamId.value = '';
+    steamId.onchange = '';
+
+    document.getElementById('savegame-dropzone').style.display = '';
+};
+
+/**
+ * 
+ */
+function init() {
+    document.getElementById('load-input').onchange = function (e) {
+        var file = e.target.files[0];
+        if (file) {
+            readSavegame(file);
+        }
+    };
+
+    document.getElementById('reset-button').onclick = function () {
+        reset();
+    };    
+};
+
+/**
+ * Downloads, imports and then exports the demo savegame.
  */
 function test() {
     console.log('requesting demo savegame');
@@ -106,22 +130,13 @@ function test() {
     request.onload = function() {
         if (request.status === 200) {
             console.log('demo savegame found');
-            display(request.response);
+            importSavegame(request.response);
         } else {
             console.log('demo savegame not found');
         }
     };
 
     request.send();
-};
-
-function init() {
-    document.getElementById('load-input').onchange = function (e) {
-        var file = e.target.files[0];
-        if (file) {
-            loadSavegame(file);            
-        }
-    };
 };
 
 window.onload = function() {

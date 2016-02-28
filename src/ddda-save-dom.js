@@ -25,11 +25,11 @@ DDDAValue.prototype.parseNode = function (node) {
     this.value = node.getAttribute('value');
     return this;
 };
-DDDAValue.prototype.serializeNode = function (doc, parentNode) {
+DDDAValue.prototype.serializeNode = function (doc) {
     var node = doc.createElement(this.elemName);
-    if (this.name) node.setAttribute('name', this.name);    
+    if (this.name) node.setAttribute('name', this.name);
     node.setAttribute('value', this.value);
-    parentNode.appendChild(node);
+    return node;
 };
 var DDDAbool = function(){
     DDDAValue.call(this)
@@ -61,7 +61,7 @@ var DDDAu32 = function(){
 var DDDAu64 = function(){
     DDDAValue.call(this)
 };
-var DDDAstring = function(){    
+var DDDAstring = function(){
     DDDAValue.call(this)
 };
 var DDDAvector3 = function(){
@@ -77,43 +77,43 @@ DDDAvector3.prototype.parseNode = function (node) {
     this.z = node.getAttribute('z');
     return this;
 };
-DDDAvector3.prototype.serializeNode = function (doc, parentNode) {    
+DDDAvector3.prototype.serializeNode = function (doc) {
     var node = doc.createElement(this.elemName);
-    if (this.name) node.setAttribute('name', this.name);   
+    if (this.name) node.setAttribute('name', this.name);
     node.setAttribute('x', this.x);
     node.setAttribute('y', this.y);
     node.setAttribute('z', this.z);
-    parentNode.appendChild(node);
+    return node;
 };
 var DDDAtime = function(){
-    this.second = null;
-    this.minute = null;
-    this.hour = null;
-    this.day = null;
-    this.month = null;
     this.year = null;
+    this.month = null;
+    this.day = null;
+    this.hour = null;
+    this.minute = null;
+    this.second = null;
 };
 DDDAtime.prototype.parseNode = function (node) {
     var name = node.getAttribute('name');
     if (name) this.name = name;
-    this.second = node.getAttribute('second');
-    this.minute = node.getAttribute('minute');
-    this.hour = node.getAttribute('hour');
-    this.day = node.getAttribute('day');
-    this.month = node.getAttribute('month');
     this.year = node.getAttribute('year');
+    this.month = node.getAttribute('month');
+    this.day = node.getAttribute('day');
+    this.hour = node.getAttribute('hour');
+    this.minute = node.getAttribute('minute');
+    this.second = node.getAttribute('second');
     return this;
 };
-DDDAtime.prototype.serializeNode = function (doc, parentNode) {
+DDDAtime.prototype.serializeNode = function (doc) {
     var node = doc.createElement(this.elemName);
-    if (this.name) node.setAttribute('name', this.name);   
-    node.setAttribute('second', this.second);
-    node.setAttribute('minute', this.minute);
-    node.setAttribute('hour', this.hour);
-    node.setAttribute('day', this.day);
-    node.setAttribute('month', this.month);
+    if (this.name) node.setAttribute('name', this.name);
     node.setAttribute('year', this.year);
-    parentNode.appendChild(node);
+    node.setAttribute('month', this.month);
+    node.setAttribute('day', this.day);
+    node.setAttribute('hour', this.hour);
+    node.setAttribute('minute', this.minute);
+    node.setAttribute('second', this.second);
+    return node;
 };
 var DDDAclass = function(){
     this.type = null;
@@ -135,9 +135,9 @@ DDDAclass.prototype.parseNode = function (node) {
     }
     return this;
 };
-DDDAclass.prototype.serializeNode = function (doc, parentNode) {
+DDDAclass.prototype.serializeNode = function (doc) {
     var node = doc.createElement(this.elemName);
-    if (this.name) node.setAttribute('name', this.name);   
+    if (this.name) node.setAttribute('name', this.name);
     node.setAttribute('type', this.type);
     for (var property in this) {
         if (this.hasOwnProperty(property)) {
@@ -145,25 +145,25 @@ DDDAclass.prototype.serializeNode = function (doc, parentNode) {
             if (!value || typeof(value.serializeNode) !== 'function') {
                 continue;
             }
-
-            value.serializeNode(doc, node);
+            var childNode = value.serializeNode(doc);
+            node.appendChild(childNode);
         }
-    }
-    parentNode.appendChild(node);
+    }    
+    return node;
 };
 var DDDAclassref = function(){
     DDDAclass.call(this)
 };
 var DDDAarray = function(){
-    this.count = 0;
     this.type = null;
+    this.count = 0;
     this.items = [];
 };
 DDDAarray.prototype.parseNode = function (node) {
-    this.count = node.getAttribute('count');
     var name = node.getAttribute('name');
     if (name) this.name = name;
     this.type = node.getAttribute('type');
+    this.count = node.getAttribute('count');
     this.items = [];
     node = node.firstChild;
     while (node) {
@@ -180,13 +180,15 @@ DDDAarray.prototype.parseNode = function (node) {
 };
 DDDAarray.prototype.serializeNode = function (doc, parentNode) {
     var node = doc.createElement(this.elemName);
-    node.setAttribute('count', this.count);
     if (this.name) node.setAttribute('name', this.name);   
     node.setAttribute('type', this.type);
+    node.setAttribute('count', this.count);
+    var childNode = null;
     for (var i = 0; i < this.items.length; i++) {
-        this.items[i].serializeNode(doc, node);
+        childNode = this.items[i].serializeNode(doc);
+        node.appendChild(childNode);
     };
-    parentNode.appendChild(node);
+    return node;
 };
 
 DDDAbool.prototype = Object.create(DDDAValue.prototype);
@@ -231,10 +233,8 @@ var DDDASaveDom = function(){};
  * @return {Object}
  */
 DDDASaveDom.prototype.parse = function (saveDocument) {
-    console.log('converting');
     var rootClass = new DDDAclass();
     rootClass.parseNode(saveDocument.documentElement);
-    console.log('converting done');
     return rootClass;
 };
 
@@ -244,7 +244,13 @@ DDDASaveDom.prototype.parse = function (saveDocument) {
  * @return {Document}
  */
 DDDASaveDom.prototype.serialize = function (rootClass) {
-    
+    var dom = document.implementation.createDocument('', null, null);
+    var rootNode = rootClass.serializeNode(dom);    
+    var pi = dom.createProcessingInstruction('xml', 'version="1.0" encoding="utf-8"');
+    dom.appendChild(pi);
+    dom.appendChild(rootNode);
+    var serializer = new XMLSerializer();
+    return serializer.serializeToString(dom).replace(/>/g, ">\n");
 };
 
 module.exports = DDDASaveDom;
