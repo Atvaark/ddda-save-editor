@@ -250,6 +250,8 @@ DDDASaveDom.prototype.serialize = function (rootClass) {
     dom.appendChild(pi);
     dom.appendChild(rootNode);
     var serializer = new XMLSerializer();
+    // The game doesn't indent the xml, it just separates tags with \n.
+    // This regex works if the xml attribues don't contain the '>' character.
     return serializer.serializeToString(dom).replace(/>/g, ">\n");
 };
 

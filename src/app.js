@@ -49,7 +49,7 @@ function exportSavedata(savedata) {
  * @param {Object} savedata
  */
 function displaySavegameData(savedata) {
-    document.getElementById('savegame-dropzone').style.display = 'none';
+    document.getElementById('import-panel').style.display = 'none';
     document.getElementById('save-button').onclick = (function() {
         return function(){
             exportSavedata(savedata);
@@ -62,7 +62,7 @@ function displaySavegameData(savedata) {
         savedata.mSteamID.value = e.target.value;
     };
 
-    document.getElementById('savegame-content').style.display = '';
+    document.getElementById('edit-panel').style.display = '';
 };
 
 /**
@@ -93,14 +93,15 @@ function readSavegame(file) {
  * 
  */
 function reset() {
-    document.getElementById('savegame-content').style.display = 'none';
+    document.getElementById('edit-panel').style.display = 'none';
     document.getElementById('save-button').onclick = '';
+    document.getElementById('load-input').value = '';    
 
     var steamId = document.getElementById('steamid');
     steamId.value = '';
     steamId.onchange = '';
 
-    document.getElementById('savegame-dropzone').style.display = '';
+    document.getElementById('import-panel').style.display = '';
 };
 
 /**

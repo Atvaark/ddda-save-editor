@@ -2,22 +2,30 @@
   "name": "ddda-save-editor",
   "version": "0.1.0",
   "description": "Savegame editor for Dragon's Dogma: Dark Arisen",
+  "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --progress --colors",
     "start": "webpack-dev-server --progress -colors --content-base dist --open http://localhost:8080/"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Atvaark/ddda-save-editor.git"
+  },
   "author": "atvaark",
   "license": "MIT",
   "dependencies": {
+    "bootstrap": "^3.3.6",
     "crc-32": "^0.4.0",
     "filesaver.js": "^0.2.0",
-    "pako": "^0.2.8",
-    "webpack": "^1.12.12"
+    "pako": "^0.2.8"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
+    "file-loader": "^0.8.5",
     "style-loader": "^0.13.0",
+    "url-loader": "^0.5.7",
+    "webpack": "^1.12.12",
     "webpack-dev-server": "^1.14.1"
   }
 }
