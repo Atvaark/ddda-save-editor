@@ -1,258 +1,309 @@
-var DDDAFactory = function() {
-    this[DDDAbool.prototype.elemName] = DDDAbool;
-    this[DDDAf32.prototype.elemName] = DDDAf32;
-    this[DDDAs8.prototype.elemName] = DDDAs8;
-    this[DDDAs16.prototype.elemName] = DDDAs16;
-    this[DDDAs32.prototype.elemName] = DDDAs32;
-    this[DDDAs64.prototype.elemName] = DDDAs64;
-    this[DDDAu8.prototype.elemName] = DDDAu8;
-    this[DDDAu16.prototype.elemName] = DDDAu16;
-    this[DDDAu32.prototype.elemName] = DDDAu32;
-    this[DDDAu64.prototype.elemName] = DDDAu64;
-    this[DDDAstring.prototype.elemName] = DDDAstring;
-    this[DDDAvector3.prototype.elemName] = DDDAvector3;
-    this[DDDAtime.prototype.elemName] = DDDAtime;
-    this[DDDAclass.prototype.elemName] = DDDAclass;
-    this[DDDAclassref.prototype.elemName] = DDDAclassref;
-    this[DDDAarray.prototype.elemName] = DDDAarray;
-};
-var DDDAValue = function(){
-    this.value = null;
-};
-DDDAValue.prototype.parseNode = function (node) {
-    var name = node.getAttribute('name');
-    if (name) this.name = name;
-    this.value = node.getAttribute('value');
-    return this;
-};
-DDDAValue.prototype.serializeNode = function (doc) {
-    var node = doc.createElement(this.elemName);
-    if (this.name) node.setAttribute('name', this.name);
-    node.setAttribute('value', this.value);
-    return node;
-};
-var DDDAbool = function(){
-    DDDAValue.call(this)
-};
-var DDDAf32 = function(){
-    DDDAValue.call(this)
-};
-var DDDAs8 = function(){
-    DDDAValue.call(this)
-};
-var DDDAs16 = function(){
-    DDDAValue.call(this)
-};
-var DDDAs32 = function(){
-    DDDAValue.call(this)
-};
-var DDDAs64 = function(){
-    DDDAValue.call(this)
-};
-var DDDAu8 = function(){
-    DDDAValue.call(this)
-};
-var DDDAu16 = function(){
-    DDDAValue.call(this)
-};
-var DDDAu32 = function(){
-    DDDAValue.call(this)
-};
-var DDDAu64 = function(){
-    DDDAValue.call(this)
-};
-var DDDAstring = function(){
-    DDDAValue.call(this)
-};
-var DDDAvector3 = function(){
-    this.x = null;
-    this.y = null;
-    this.z = null;
-};
-DDDAvector3.prototype.parseNode = function (node) {
-    var name = node.getAttribute('name');
-    if (name) this.name = name;
-    this.x = node.getAttribute('x');
-    this.y = node.getAttribute('y');
-    this.z = node.getAttribute('z');
-    return this;
-};
-DDDAvector3.prototype.serializeNode = function (doc) {
-    var node = doc.createElement(this.elemName);
-    if (this.name) node.setAttribute('name', this.name);
-    node.setAttribute('x', this.x);
-    node.setAttribute('y', this.y);
-    node.setAttribute('z', this.z);
-    return node;
-};
-var DDDAtime = function(){
-    this.year = null;
-    this.month = null;
-    this.day = null;
-    this.hour = null;
-    this.minute = null;
-    this.second = null;
-};
-DDDAtime.prototype.parseNode = function (node) {
-    var name = node.getAttribute('name');
-    if (name) this.name = name;
-    this.year = node.getAttribute('year');
-    this.month = node.getAttribute('month');
-    this.day = node.getAttribute('day');
-    this.hour = node.getAttribute('hour');
-    this.minute = node.getAttribute('minute');
-    this.second = node.getAttribute('second');
-    return this;
-};
-DDDAtime.prototype.serializeNode = function (doc) {
-    var node = doc.createElement(this.elemName);
-    if (this.name) node.setAttribute('name', this.name);
-    node.setAttribute('year', this.year);
-    node.setAttribute('month', this.month);
-    node.setAttribute('day', this.day);
-    node.setAttribute('hour', this.hour);
-    node.setAttribute('minute', this.minute);
-    node.setAttribute('second', this.second);
-    return node;
-};
-var DDDAclass = function(){
-    this.type = null;
-};
-DDDAclass.prototype.parseNode = function (node) {
-    var name = node.getAttribute('name');
-    if (name) this.name = name;
-    this.type = node.getAttribute('type');
-    node = node.firstChild;
-    while (node) {
-        if (node.nodeType == 1) {
-            var memberType = DDDAclass.factory[node.tagName];
-            var member = new memberType();
-            member.parseNode(node);
-            this[member.name] = member;
-        }
-
-        node = node.nextSibling;
+class DDDAValue {
+    constructor() {
+        this.value = null;
     }
-    return this;
-};
-DDDAclass.prototype.serializeNode = function (doc) {
-    var node = doc.createElement(this.elemName);
-    if (this.name) node.setAttribute('name', this.name);
-    node.setAttribute('type', this.type);
-    for (var property in this) {
-        if (this.hasOwnProperty(property)) {
-            var value = this[property];
-            if (!value || typeof(value.serializeNode) !== 'function') {
-                continue;
-            }
-            var childNode = value.serializeNode(doc);
-            node.appendChild(childNode);
-        }
-    }    
-    return node;
-};
-var DDDAclassref = function(){
-    DDDAclass.call(this)
-};
-var DDDAarray = function(){
-    this.type = null;
-    this.count = 0;
-    this.items = [];
-};
-DDDAarray.prototype.parseNode = function (node) {
-    var name = node.getAttribute('name');
-    if (name) this.name = name;
-    this.type = node.getAttribute('type');
-    this.count = node.getAttribute('count');
-    this.items = [];
-    node = node.firstChild;
-    while (node) {
-        if (node.nodeType == 1) {
-            var itemType = DDDAarray.factory[node.tagName];
-            var item = new itemType();
-            item.parseNode(node);
-            this.items.push(item);
-        }
 
-        node = node.nextSibling;
-    }    
-    return this;
-};
-DDDAarray.prototype.serializeNode = function (doc, parentNode) {
-    var node = doc.createElement(this.elemName);
-    if (this.name) node.setAttribute('name', this.name);   
-    node.setAttribute('type', this.type);
-    node.setAttribute('count', this.count);
-    var childNode = null;
-    for (var i = 0; i < this.items.length; i++) {
-        childNode = this.items[i].serializeNode(doc);
-        node.appendChild(childNode);
+    static get elementName() {
+        return null;
+    }
+
+    parseNode(node) {
+        const name = node.getAttribute('name');
+        if (name) this.name = name;
+        this.value = node.getAttribute('value');
+        return this;
     };
-    return node;
-};
 
-DDDAbool.prototype = Object.create(DDDAValue.prototype);
-DDDAf32.prototype = Object.create(DDDAValue.prototype);
-DDDAs8.prototype = Object.create(DDDAValue.prototype);
-DDDAs16.prototype = Object.create(DDDAValue.prototype);
-DDDAs32.prototype = Object.create(DDDAValue.prototype);
-DDDAs64.prototype = Object.create(DDDAValue.prototype);
-DDDAu8.prototype = Object.create(DDDAValue.prototype);
-DDDAu16.prototype = Object.create(DDDAValue.prototype);
-DDDAu32.prototype = Object.create(DDDAValue.prototype);
-DDDAu64.prototype = Object.create(DDDAValue.prototype);
-DDDAstring.prototype = Object.create(DDDAValue.prototype);
-DDDAclassref.prototype = Object.create(DDDAclass.prototype);
+    serializeNode(doc) {
+        const node = doc.createElement(this.elemName);
+        if (this.name) node.setAttribute('name', this.name);
+        node.setAttribute('value', this.value);
+        return node;
+    };  
+}
 
-DDDAValue.prototype.elemName = null;
-DDDAbool.prototype.elemName = 'bool';
-DDDAf32.prototype.elemName = 'f32';
-DDDAs8.prototype.elemName = 's8';
-DDDAs16.prototype.elemName = 's16';
-DDDAs32.prototype.elemName = 's32';
-DDDAs64.prototype.elemName = 's64';
-DDDAu8.prototype.elemName = 'u8';
-DDDAu16.prototype.elemName = 'u16';
-DDDAu32.prototype.elemName = 'u32';
-DDDAu64.prototype.elemName = 'u64';
-DDDAstring.prototype.elemName = 'string';
-DDDAvector3.prototype.elemName = 'vector3';
-DDDAtime.prototype.elemName = 'time';
-DDDAclass.prototype.elemName = 'class';
-DDDAclassref.prototype.elemName = 'classref';
-DDDAarray.prototype.elemName = 'array';
+class DDDAbool extends DDDAValue {    
+    static get elementName() {
+        return 'bool';
+    }
+}
 
-DDDAclass.factory = new DDDAFactory();
-DDDAarray.factory = new DDDAFactory();
+class DDDAf32 extends DDDAValue {
+    static get elementName() {
+        return 'f32';
+    }
+}
 
-var DDDASaveDom = function(){};
+class DDDAs8 extends DDDAValue {
+    static get elementName() {
+        return 's8';
+    }
+}
 
-/**
- * Converts the savegame DOM to an object.
- * @param {Document} saveDocument 
- * @return {Object}
- */
-DDDASaveDom.prototype.parse = function (saveDocument) {
-    var rootClass = new DDDAclass();
-    rootClass.parseNode(saveDocument.documentElement);
-    return rootClass;
-};
+class DDDAs16 extends DDDAValue {
+    static get elementName() {
+        return 's16';
+    }
+}
 
-/**
- * Converts  an object to a savegame DOM .
- * @param {Object} rootClass 
- * @return {Document}
- */
-DDDASaveDom.prototype.serialize = function (rootClass) {
-    var dom = document.implementation.createDocument('', null, null);
-    var rootNode = rootClass.serializeNode(dom);    
-    var pi = dom.createProcessingInstruction('xml', 'version="1.0" encoding="utf-8"');
-    dom.appendChild(pi);
-    dom.appendChild(rootNode);
-    var serializer = new XMLSerializer();
-    // The game doesn't indent the xml, it just separates tags with \n.
-    // This regex works if the xml attribues don't contain the '>' character.
-    return serializer.serializeToString(dom).replace(/>/g, ">\n");
-};
+class DDDAs32 extends DDDAValue {
+    static get elementName() {
+        return 's32';
+    }
+}
 
-module.exports = DDDASaveDom;
+class DDDAs64 extends DDDAValue {
+    static get elementName() {
+        return 's64';
+    }
+}
+
+class DDDAu8 extends DDDAValue {
+    static get elementName() {
+        return 'u8';
+    }
+}
+
+class DDDAu16 extends DDDAValue {
+    static get elementName() {
+        return 'u16';
+    }
+}
+
+class DDDAu32 extends DDDAValue {
+    static get elementName() {
+        return 'u32';
+    }
+}
+
+class DDDAu64 extends DDDAValue {
+    static get elementName() {
+        return 'u64';
+    }
+}
+
+class DDDAstring extends DDDAValue {
+    static get elementName() {
+        return 'string';
+    }
+}
+
+class DDDAvector3 {
+    constructor() {
+        this.x = null;
+        this.y = null;
+        this.z = null;        
+    }
+
+    static get elementName() {
+        return 'vector3';
+    }
+
+    parseNode(node) {
+        const name = node.getAttribute('name');
+        if (name) this.name = name;
+        this.x = node.getAttribute('x');
+        this.y = node.getAttribute('y');
+        this.z = node.getAttribute('z');
+        return this;
+    }
+
+    serializeNode(doc) {
+        const node = doc.createElement(this.elemName);
+        if (this.name) node.setAttribute('name', this.name);
+        node.setAttribute('x', this.x);
+        node.setAttribute('y', this.y);
+        node.setAttribute('z', this.z);
+        return node;
+    }
+}
+
+class DDDAtime {
+    constructor() {
+        this.year = null;
+        this.month = null;
+        this.day = null;
+        this.hour = null;
+        this.minute = null;
+        this.second = null;
+    }
+
+    static get elementName() {
+        return 'time';
+    }
+
+    parseNode(node) {
+        const name = node.getAttribute('name');
+        if (name) this.name = name;
+        this.year = node.getAttribute('year');
+        this.month = node.getAttribute('month');
+        this.day = node.getAttribute('day');
+        this.hour = node.getAttribute('hour');
+        this.minute = node.getAttribute('minute');
+        this.second = node.getAttribute('second');
+        return this;
+    }
+
+    serializeNode(doc) {
+        const node = doc.createElement(this.elemName);
+        if (this.name) node.setAttribute('name', this.name);
+        node.setAttribute('year', this.year);
+        node.setAttribute('month', this.month);
+        node.setAttribute('day', this.day);
+        node.setAttribute('hour', this.hour);
+        node.setAttribute('minute', this.minute);
+        node.setAttribute('second', this.second);
+        return node;
+    }
+}
+
+class DDDAclass {
+    constructor() {
+        this.type = null;
+    }
+
+    static get elementName() {
+        return 'class';
+    }
+
+    parseNode(node, factory) {
+        const name = node.getAttribute('name');
+        if (name) this.name = name;
+        this.type = node.getAttribute('type');
+        node = node.firstChild;
+        while (node) {
+            if (node.nodeType == 1) {
+                const memberType = factory[node.tagName];
+                const member = new memberType();
+                member.parseNode(node, factory);
+                this[member.name] = member;
+            }
+
+            node = node.nextSibling;
+        }
+        return this;
+    }
+
+    serializeNode(doc) {
+        const node = doc.createElement(this.elemName);
+        if (this.name) node.setAttribute('name', this.name);
+        node.setAttribute('type', this.type);
+        for (let property in this) {
+            if (this.hasOwnProperty(property)) {
+                const value = this[property];
+                if (!value || typeof(value.serializeNode) !== 'function') {
+                    continue;
+                }
+                const childNode = value.serializeNode(doc);
+                node.appendChild(childNode);
+            }
+        }    
+        return node;
+    }
+}
+
+class DDDAclassref extends DDDAclass {
+    static get elementName() {
+        return 'classref';
+    }
+}
+
+class DDDAarray {
+    constructor() {
+        this.type = null;
+        this.count = 0;
+        this.items = [];
+    }
+
+    static get elementName() {
+        return 'array';
+    }
+
+    parseNode(node, factory) {
+        const name = node.getAttribute('name');
+        if (name) this.name = name;
+        this.type = node.getAttribute('type');
+        this.count = node.getAttribute('count');
+        this.items = [];
+        node = node.firstChild;
+        while (node) {
+            if (node.nodeType == 1) {
+                const itemType = factory[node.tagName];
+                const item = new itemType();
+                item.parseNode(node, factory);
+                this.items.push(item);
+            }
+
+            node = node.nextSibling;
+        }    
+        return this;
+    }
+
+    serializeNode(doc) {
+        const node = doc.createElement(this.elemName);
+        if (this.name) node.setAttribute('name', this.name);   
+        node.setAttribute('type', this.type);
+        node.setAttribute('count', this.count);
+        let childNode = null;
+        for (let i = 0; i < this.items.length; i++) {
+            childNode = this.items[i].serializeNode(doc);
+            node.appendChild(childNode);
+        };
+        return node;
+    }
+}
+
+class DDDAFactory {
+    constructor() {
+        this[DDDAbool.elementName] = DDDAbool;
+        this[DDDAf32.elementName] = DDDAf32;
+        this[DDDAs8.elementName] = DDDAs8;
+        this[DDDAs16.elementName] = DDDAs16;
+        this[DDDAs32.elementName] = DDDAs32;
+        this[DDDAs64.elementName] = DDDAs64;
+        this[DDDAu8.elementName] = DDDAu8;
+        this[DDDAu16.elementName] = DDDAu16;
+        this[DDDAu32.elementName] = DDDAu32;
+        this[DDDAu64.elementName] = DDDAu64;
+        this[DDDAstring.elementName] = DDDAstring;
+        this[DDDAvector3.elementName] = DDDAvector3;
+        this[DDDAtime.elementName] = DDDAtime;
+        this[DDDAclass.elementName] = DDDAclass;
+        this[DDDAclassref.elementName] = DDDAclassref;
+        this[DDDAarray.elementName] = DDDAarray;
+    }
+}
+
+class DDDASaveDom {
+
+     /**
+     * Converts the savegame DOM to an object.
+     * @param {Document} saveDocument 
+     * @return {Object}
+     */
+    parse(saveDocument) {
+        const factory = new DDDAFactory();
+        const rootClass = new DDDAclass();
+        rootClass.parseNode(saveDocument.documentElement, factory);
+        return rootClass;
+    };
+
+    /**
+     * Converts  an object to a savegame DOM .
+     * @param {Object} rootClass 
+     * @return {Document}
+     */
+    serialize(rootClass) {
+        const dom = document.implementation.createDocument('', null, null);
+        const rootNode = rootClass.serializeNode(dom);    
+        const pi = dom.createProcessingInstruction('xml', 'version="1.0" encoding="utf-8"');
+        dom.appendChild(pi);
+        dom.appendChild(rootNode);
+        const serializer = new XMLSerializer();
+        // The game doesn't indent the xml, it just separates tags with \n.
+        // This regex works if the xml attribues don't contain the '>' character.
+        return serializer.serializeToString(dom).replace(/>/g, ">\n");
+    };   
+}
+
+export default DDDASaveDom

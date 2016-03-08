@@ -15,26 +15,26 @@ class DDDASave {
     parse(buffer) {
         this.header.parse(buffer);
 
-        var data = buffer.slice(this.header.byteLength, this.header.byteLength + this.header.compressedSize);
+        let data = buffer.slice(this.header.byteLength, this.header.byteLength + this.header.compressedSize);
         data = this.decompress(data);
 
-        var decoder = new TextDecoder()
+        const decoder = new TextDecoder()
         this.data = decoder.decode(data);
     }
 
     serialize() {
-        var encoder = new TextEncoder()
-        var encodedData = encoder.encode(this.data);
-        var compressedData = this.compress(encodedData);
+        const encoder = new TextEncoder()
+        const encodedData = encoder.encode(this.data);
+        const compressedData = this.compress(encodedData);
 
         this.header.version = 21;
         this.header.size = encodedData.byteLength;
         this.header.compressedSize = compressedData.byteLength;
         this.header.checksum = this.hash(compressedData);
-        var headerData = this.header.serialize();
+        const headerData = this.header.serialize();
 
-        var buffer = new ArrayBuffer(this.byteLength);
-        var array = new Int8Array(buffer);
+        const buffer = new ArrayBuffer(this.byteLength);
+        const array = new Int8Array(buffer);
         array.set(headerData, 0);
         array.set(compressedData, headerData.byteLength);
 
@@ -42,7 +42,7 @@ class DDDASave {
     }
 
     decompress(buffer) {
-        var decompressed;
+        let decompressed;
         try {
             decompressed = pako.inflate(buffer);
         } catch (err) {
@@ -54,7 +54,7 @@ class DDDASave {
     }
 
     compress(buffer) {
-        var compressed;
+        let compressed;
         try {
             compressed = pako.deflate(buffer);
         } catch (err) {
@@ -91,20 +91,20 @@ class DDDASaveHeader {
     }
 
     parse(buffer) {
-        var view = new DataView(buffer);
+        const view = new DataView(buffer);
         this.version = view.getInt32(0, this.littleEndian);
         this.size = view.getInt32(4, this.littleEndian);
         this.compressedSize = view.getInt32(8, this.littleEndian);
-        var h1 = view.getInt32(12, this.littleEndian);
-        var h2 = view.getInt32(16, this.littleEndian);
-        var h3 = view.getInt32(20, this.littleEndian);
+        const h1 = view.getInt32(12, this.littleEndian);
+        const h2 = view.getInt32(16, this.littleEndian);
+        const h3 = view.getInt32(20, this.littleEndian);
         this.checksum = view.getInt32(24, this.littleEndian);
-        var h4 = view.getInt32(28, this.littleEndian);
+        const h4 = view.getInt32(28, this.littleEndian);
     }
 
     serialize() {
-        var buffer = new ArrayBuffer(this.byteLength);
-        var view = new DataView(buffer);
+        const buffer = new ArrayBuffer(this.byteLength);
+        const view = new DataView(buffer);
         view.setInt32(0, this.version, this.littleEndian);
         view.setInt32(4, this.size, this.littleEndian);
         view.setInt32(8, this.compressedSize, this.littleEndian);
@@ -117,4 +117,4 @@ class DDDASaveHeader {
     }
 }
 
-module.exports = DDDASave;
+export default DDDASave

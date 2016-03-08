@@ -1,146 +1,151 @@
-var filesaver = require('filesaver.js');
+import filesaver from 'filesaver.js'
+import DDDASave from './ddda-save'
+import DDDASaveDom from './ddda-save-dom'
 
-var DDDASave = require('./ddda-save')
-var DDDASaveDom = require('./ddda-save-dom')
+class App {
+    constructor() {
+        this.savedata = null;
+    }
 
-/**
- * Parses the savegame and returns the content as a string.
- * @param {ArrayBuffer} buffer
- * @return {String}
- */
-function parseSavegame(buffer){
-    var save = new DDDASave();
-    save.parse(buffer); 
-    return save.data;
-};
+    /**
+     * Parses the savegame and returns the content as a string.
+     * @param {ArrayBuffer} buffer
+     * @return {String}
+     */
+    parseSavegame(buffer) {
+        const save = new DDDASave();
+        save.parse(buffer); 
+        return save.data;
+    }
 
-/**
- * Parses the xml savegame and returns the content as an object.
- * @param {String} text
- * @return {Object}
- */
-function parseSavegameData(text){
-    var parser = new DOMParser();
-    var saveDocument = parser.parseFromString(text, "application/xml");
+    /**
+     * Parses the xml savegame and returns the content as an object.
+     * @param {String} text
+     * @return {Object}
+     */
+    parseSavegameData(text) {
+        const parser = new DOMParser();
+        const saveDocument = parser.parseFromString(text, "application/xml");
 
-    var saveDom = new DDDASaveDom();
-    var savedata = saveDom.parse(saveDocument);
+        const saveDom = new DDDASaveDom();
+        const savedata = saveDom.parse(saveDocument);
 
-    return savedata;
-};
+        return savedata;
+    }
 
-/**
- * Serializes the savedata and downloads it.
- * @param {Object} savedata
- */
-function exportSavedata(savedata) { 
-    var saveDom = new DDDASaveDom();
-    var text = saveDom.serialize(savedata);
+    /**
+     * Serializes the savedata and downloads it.
+     * @param {Object} savedata
+     */
+    exportSavedata(savedata) { 
+        const saveDom = new DDDASaveDom();
+        const text = saveDom.serialize(savedata);
 
-    var save = new DDDASave(text);
-    var data = save.serialize();
+        const save = new DDDASave(text);
+        const data = save.serialize();
 
-    var blob = new Blob([data], {type: "application/octet-stream"});
-    filesaver.saveAs(blob, "DDDA.sav");
-};
+        const blob = new Blob([data], {type: "application/octet-stream"});
+        filesaver.saveAs(blob, "DDDA.sav");
+    }
 
-/**
- * 
- * @param {Object} savedata
- */
-function displaySavegameData(savedata) {
-    document.getElementById('import-panel').style.display = 'none';
-    document.getElementById('save-button').onclick = (function() {
-        return function(){
-            exportSavedata(savedata);
+    /**
+     * 
+     * @param {Object} savedata
+     */
+    displaySavegameData(savedata) {
+        document.getElementById('import-panel').style.display = 'none';
+        document.getElementById('save-button').onclick = () => {
+            this.exportSavedata(savedata);
         };
-    })();
 
-    var steamId = document.getElementById('steamid');
-    steamId.value = savedata.mSteamID.value;
-    steamId.onchange = function (e) {
-        savedata.mSteamID.value = e.target.value;
-    };
-
-    document.getElementById('edit-panel').style.display = '';
-};
-
-/**
- * 
- * @param {ArrayBuffer} buffer
- */
-function importSavegame(buffer) {
-    var text = parseSavegame(buffer);
-    var savedata = parseSavegameData(text);
-    
-    displaySavegameData(savedata);
-};
-
-/**
- * 
- * @param {File} file
- */
-function readSavegame(file) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-        importSavegame(e.target.result);
-    };
-
-    reader.readAsArrayBuffer(file);
-};
-
-/**
- * 
- */
-function reset() {
-    document.getElementById('edit-panel').style.display = 'none';
-    document.getElementById('save-button').onclick = '';
-    document.getElementById('load-input').value = '';    
-
-    var steamId = document.getElementById('steamid');
-    steamId.value = '';
-    steamId.onchange = '';
-
-    document.getElementById('import-panel').style.display = '';
-};
-
-/**
- * 
- */
-function init() {
-    document.getElementById('load-input').onchange = function (e) {
-        var file = e.target.files[0];
-        if (file) {
-            readSavegame(file);
+        const steamId = document.getElementById('steamid');
+        steamId.value = savedata.mSteamID.value;
+        steamId.onchange = (e) => {
+            this.savedata.mSteamID.value = e.target.value;
         }
-    };
 
-    document.getElementById('reset-button').onclick = function () {
-        reset();
-    };    
-};
+        document.getElementById('edit-panel').style.display = '';
+    }
 
-/**
- * Downloads, imports and then exports the demo savegame.
- */
-function test() {
-    console.log('requesting demo savegame');
-    var request = new XMLHttpRequest();
-    request.open("GET", "DDDA.sav", true);
-    request.responseType = "arraybuffer";
-    request.onload = function() {
-        if (request.status === 200) {
-            console.log('demo savegame found');
-            importSavegame(request.response);
-        } else {
-            console.log('demo savegame not found');
-        }
-    };
+    /**
+     * 
+     * @param {ArrayBuffer} buffer
+     */
+    importSavegame(buffer) {
+        const text = this.parseSavegame(buffer);
+        const savedata = this.parseSavegameData(text);
+        
+        this.displaySavegameData(savedata);
+    }
 
-    request.send();
-};
+    /**
+     * 
+     * @param {File} file
+     */
+    readSavegame(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.importSavegame(e.target.result);
+        };
+
+        reader.readAsArrayBuffer(file);
+    }
+
+    /**
+     * 
+     */
+    reset() {
+        document.getElementById('edit-panel').style.display = 'none';
+        document.getElementById('save-button').onclick = '';
+        document.getElementById('load-input').value = '';    
+
+        const steamId = document.getElementById('steamid');
+        steamId.value = '';
+        steamId.onchange = '';
+
+        document.getElementById('import-panel').style.display = '';
+    }
+
+    /**
+     * 
+     */
+    init() {
+        document.getElementById('load-input').onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                this.readSavegame(file);
+            }
+        };
+
+        document.getElementById('reset-button').onclick = (e) => {
+            this.reset();
+        };
+    }
+
+    /**
+     * Downloads, imports and then exports the demo savegame.
+     */
+    test() {
+        console.log('requesting demo savegame');
+        const request = new XMLHttpRequest();
+        request.open("GET", "DDDA.sav", true);
+        request.responseType = "arraybuffer";
+        request.onload = () => {
+            if (request.status === 200) {
+                console.log('demo savegame found');
+                this.importSavegame(request.response);
+            } else {
+                console.log('demo savegame not found');
+            }
+        };
+
+        request.send();
+    }
+}
+
+const app = new App();
 
 window.onload = function() {
-    //test();
-    init();
+    //app.test();
+    app.init();
 };
