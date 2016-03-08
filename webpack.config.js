@@ -15,6 +15,7 @@ module.exports = {
     },
     module: {
         loaders: [
+            { test: /\.js$/, loader: 'babel-loader', include: directories.src, query: { presets: ['es2015'] } },
             { test: /\.css$/, loaders: ['style', 'css'], include: directories.src },
             { test: /\.css$/, loader: 'style-loader!css-loader', exclude: directories.src },
             { test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/, loader: 'url?limit=10000&mimetype=application/font-woff'},
