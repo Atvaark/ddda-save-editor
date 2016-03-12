@@ -276,7 +276,6 @@ class DDDAFactory {
 }
 
 class DDDASaveDom {
-
    /**
    * Converts the savegame DOM to an object.
    * @param {Document} saveDocument

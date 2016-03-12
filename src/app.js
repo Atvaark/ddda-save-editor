@@ -1,6 +1,6 @@
 import filesaver from 'filesaver.js';
-import DDDASave from './ddda-save';
-import DDDASaveDom from './ddda-save-dom';
+import DDDASave from './ddda-save.js';
+import DDDASaveDom from './ddda-save-dom.js';
 
 class App {
   constructor() {
@@ -25,7 +25,7 @@ class App {
    */
   parseSavegameData(text) {
     const parser = new DOMParser();
-    const saveDocument = parser.parseFromString(text, 'application/xml');
+    const saveDocument = parser.parseFromString(text, 'text/xml');
 
     const saveDom = new DDDASaveDom();
     const savedata = saveDom.parse(saveDocument);
@@ -143,7 +143,7 @@ class App {
 
 const app = new App();
 
-window.onload = function() {
-  //app.test();
+window.onload = function () {
+  // app.test();
   app.init();
 };
