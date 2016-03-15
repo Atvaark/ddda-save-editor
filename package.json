@@ -6,7 +6,7 @@
   "scripts": {
     "test": "karma start --single-run --browsers PhantomJS",
     "test:chrome": "karma start --single-run --browsers Chrome",
-    "build": "webpack --progress --colors",
+    "build": "cross-env NODE_ENV=production webpack --progress --colors",
     "start": "webpack-dev-server --progress -colors --content-base dist --open http://localhost:8080/"
   },
   "repository": {
@@ -19,14 +19,19 @@
     "bootstrap": "^3.3.6",
     "crc-32": "^0.4.0",
     "filesaver.js": "^0.2.0",
-    "pako": "^0.2.8"
+    "pako": "^0.2.8",
+    "react": "^0.14.7",
+    "react-dom": "^0.14.7"
   },
   "devDependencies": {
     "babel-core": "^6.6.5",
     "babel-loader": "^6.2.4",
     "babel-preset-es2015": "^6.6.0",
+    "babel-preset-react": "^6.5.0",
+    "cross-env": "^1.0.7",
     "css-loader": "^0.23.1",
     "file-loader": "^0.8.5",
+    "html-webpack-plugin": "^2.10.0",
     "jasmine-core": "^2.4.1",
     "karma": "^0.13.22",
     "karma-chrome-launcher": "^0.2.2",

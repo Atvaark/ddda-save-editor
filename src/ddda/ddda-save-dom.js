@@ -7,6 +7,14 @@ class DDDAValue {
     return null;
   }
 
+  get elementName() {
+    return DDDAValue.elementName;
+  }
+
+  toString() {
+    return this.value;
+  }
+
   parseNode(node) {
     const name = node.getAttribute('name');
     if (name) this.name = name;
@@ -15,7 +23,7 @@ class DDDAValue {
   }
 
   serializeNode(doc) {
-    const node = doc.createElement(this.elemName);
+    const node = doc.createElement(this.elementName);
     if (this.name) node.setAttribute('name', this.name);
     node.setAttribute('value', this.value);
     return node;
@@ -26,11 +34,19 @@ class DDDAbool extends DDDAValue {
   static get elementName() {
     return 'bool';
   }
+
+  get elementName() {
+    return DDDAbool.elementName;
+  }
 }
 
 class DDDAf32 extends DDDAValue {
   static get elementName() {
     return 'f32';
+  }
+
+  get elementName() {
+    return DDDAf32.elementName;
   }
 }
 
@@ -38,11 +54,19 @@ class DDDAs8 extends DDDAValue {
   static get elementName() {
     return 's8';
   }
+
+  get elementName() {
+    return DDDAs8.elementName;
+  }
 }
 
 class DDDAs16 extends DDDAValue {
   static get elementName() {
     return 's16';
+  }
+
+  get elementName() {
+    return DDDAs16.elementName;
   }
 }
 
@@ -50,11 +74,19 @@ class DDDAs32 extends DDDAValue {
   static get elementName() {
     return 's32';
   }
+
+  get elementName() {
+    return DDDAs32.elementName;
+  }
 }
 
 class DDDAs64 extends DDDAValue {
   static get elementName() {
     return 's64';
+  }
+
+  get elementName() {
+    return DDDAs64.elementName;
   }
 }
 
@@ -62,11 +94,19 @@ class DDDAu8 extends DDDAValue {
   static get elementName() {
     return 'u8';
   }
+
+  get elementName() {
+    return DDDAu8.elementName;
+  }
 }
 
 class DDDAu16 extends DDDAValue {
   static get elementName() {
     return 'u16';
+  }
+
+  get elementName() {
+    return DDDAu16.elementName;
   }
 }
 
@@ -74,17 +114,29 @@ class DDDAu32 extends DDDAValue {
   static get elementName() {
     return 'u32';
   }
+
+  get elementName() {
+    return DDDAu32.elementName;
+  }
 }
 
 class DDDAu64 extends DDDAValue {
   static get elementName() {
     return 'u64';
   }
+
+  get elementName() {
+    return DDDAu64.elementName;
+  }
 }
 
 class DDDAstring extends DDDAValue {
   static get elementName() {
     return 'string';
+  }
+
+  get elementName() {
+    return DDDAstring.elementName;
   }
 }
 
@@ -99,6 +151,14 @@ class DDDAvector3 {
     return 'vector3';
   }
 
+  get elementName() {
+    return DDDAvector3.elementName;
+  }
+
+  toString() {
+    return `x: ${this.x} y: ${this.y} z: ${this.z} `;
+  }
+
   parseNode(node) {
     const name = node.getAttribute('name');
     if (name) this.name = name;
@@ -109,7 +169,7 @@ class DDDAvector3 {
   }
 
   serializeNode(doc) {
-    const node = doc.createElement(this.elemName);
+    const node = doc.createElement(this.elementName);
     if (this.name) node.setAttribute('name', this.name);
     node.setAttribute('x', this.x);
     node.setAttribute('y', this.y);
@@ -132,6 +192,14 @@ class DDDAtime {
     return 'time';
   }
 
+  get elementName() {
+    return DDDAtime.elementName;
+  }
+
+  toString() {
+    return `year: ${this.year} month: ${this.month} day: ${this.day} hour: ${this.hour} minute: ${this.minute} second: ${this.second}`;
+  }
+
   parseNode(node) {
     const name = node.getAttribute('name');
     if (name) this.name = name;
@@ -145,7 +213,7 @@ class DDDAtime {
   }
 
   serializeNode(doc) {
-    const node = doc.createElement(this.elemName);
+    const node = doc.createElement(this.elementName);
     if (this.name) node.setAttribute('name', this.name);
     node.setAttribute('year', this.year);
     node.setAttribute('month', this.month);
@@ -164,6 +232,30 @@ class DDDAclass {
 
   static get elementName() {
     return 'class';
+  }
+
+  get elementName() {
+    return DDDAclass.elementName;
+  }
+
+  toString() {
+    return `type: ${this.type}`;
+  }
+
+  get members() {
+    const members = [];
+    for (const property in this) {
+      if (this.hasOwnProperty(property)) {
+        const value = this[property];
+        if (!value || typeof(value.serializeNode) !== 'function') {
+          continue;
+        }
+
+        members.push(value);
+      }
+    }
+
+    return members;
   }
 
   parseNode(node, factory) {
@@ -186,7 +278,7 @@ class DDDAclass {
   }
 
   serializeNode(doc) {
-    const node = doc.createElement(this.elemName);
+    const node = doc.createElement(this.elementName);
     if (this.name) node.setAttribute('name', this.name);
     node.setAttribute('type', this.type);
     for (const property in this) {
@@ -220,6 +312,14 @@ class DDDAarray {
     return 'array';
   }
 
+  toString() {
+    return `type: ${this.type} count: ${this.count}`;
+  }
+
+  get elementName() {
+    return DDDAarray.elementName;
+  }
+
   parseNode(node, factory) {
     const name = node.getAttribute('name');
     if (name) this.name = name;
@@ -241,7 +341,7 @@ class DDDAarray {
   }
 
   serializeNode(doc) {
-    const node = doc.createElement(this.elemName);
+    const node = doc.createElement(this.elementName);
     if (this.name) node.setAttribute('name', this.name);
     node.setAttribute('type', this.type);
     node.setAttribute('count', this.count);
@@ -306,4 +406,20 @@ class DDDASaveDom {
   }
 }
 
+export { DDDAbool };
+export { DDDAf32 };
+export { DDDAs8 };
+export { DDDAs16 };
+export { DDDAs32 };
+export { DDDAs64 };
+export { DDDAu8 };
+export { DDDAu16 };
+export { DDDAu32 };
+export { DDDAu64 };
+export { DDDAstring };
+export { DDDAvector3 };
+export { DDDAtime };
+export { DDDAclass };
+export { DDDAclassref };
+export { DDDAarray };
 export default DDDASaveDom;

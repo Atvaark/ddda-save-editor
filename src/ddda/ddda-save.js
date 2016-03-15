@@ -97,7 +97,6 @@ class DDDASave {
     try {
       decompressed = pako.inflate(buffer);
     } catch (err) {
-      console.error(err);
       decompressed = null;
     }
 
@@ -109,7 +108,6 @@ class DDDASave {
     try {
       compressed = pako.deflate(buffer);
     } catch (err) {
-      console.error(err);
       compressed = null;
     }
 

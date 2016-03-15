@@ -1,4 +1,4 @@
-import DDDASaveDom from '../src/ddda-save-dom.js';
+import DDDASaveDom from '../src/ddda/ddda-save-dom.js';
 
 describe('The DDDASaveDom class', () => {
   const loadSavegame = (text) => {
