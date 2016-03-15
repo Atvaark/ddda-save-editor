@@ -1,45 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <title>Dragon's Dogma Savegame Editor</title>
-    <script src="bundle.js"></script>
   </head>
   <body>
-  <div class="page-header">
-    <h1>ddda-save-editor <small>Dragon's Dogma: Dark Arisen savegame editor</small></h1>
-  </div> 
-  <div id="import-panel" class="panel panel-primary">
-    <div class="panel-heading">Import DDDA.sav</div>
-    <div class="panel-body">
-      <div>
-        <label for="load-input">File</label>
-        <input id="load-input" type="file" class="btn btn-default btn-file"/>    
-        <h3>Hints</h3>
-        <ol>
-          <li>Savegames can be found here: <i>%ProgramFiles(x86)%\Steam\userdata\%userid%\367500\remote\DDDA.sav</i> <span class="label label-info">Info</span></li>
-          <li>Your savegame will <b>not</b> be uploaded to a server. <span class="label label-info">Info</span></li>
-          <li>Create a backup before using edited savegames. <span class="label label-warning">Warning</span></li>
-          <li>Editing pawn data incorrectly can prevent it from being hired. <span class="label label-warning">Warning</span></li>
-        </ol>
-      </div>
-  </div>
-  </div>
-
-  <div id="edit-panel" class="panel panel-primary" style="display:none">
-    <div class="panel-heading">Edit</div>
-    <div class="panel-body">
-
-      <div class="form-group form-inline">
-        <label for="steamid">SteamId</label>
-        <input id="steamid" type="text" name="steamid" class="form-control"/>
-      </div>
-
-      <div class="panel-footer">
-        <button id="save-button" class="btn btn-primary">Save DDDA.sav</button>
-        <button id="reset-button" class="btn btn-default">Reset</button>
-      </div>
-    </div>
-  </div>
-  </body>
+  <script src="bundle.js"></script></body>
 </html>
